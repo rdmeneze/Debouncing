@@ -30,19 +30,21 @@ int main()
     
     SetSystemClock();  /* configure the system clock  */    
     
-    TTimerCfgTimeOut( 500 );  /* initialize the ttimer system  */
+    TTimerCfgTimeOut( 500 );  /* initialize the ttimer engine  */
     
-    BrdLedsInit();
-    BrdKeyInit();
+    BrdLedsInit();  /* initialize the board leds engine */
+    BrdKeyInit();   /* initialize the board keys engine */
     
     BrdLedsSetState( USR_LED0, 0 );
     BrdLedsSetState( USR_LED1, 0 );
     BrdLedsSetState( USR_LED2, 0 );
     BrdLedsSetState( USR_LED3, 0 );
 
+    // create a periodic timer to execute TaskMain
     TTimerRegisterCallBack( TTIMER_1MS_INTERVAL, TimerPeriodic, TaskMain, NULL, &dwTimerHandle );
     TTimerStart( dwTimerHandle );
 
+    // create a periodic timer to execute TaskBlink
     TTimerRegisterCallBack( TTIMER_1SEC_INTERVAL, TimerPeriodic, TaskBlink, NULL, &dwTimerHandle );
     TTimerStart( dwTimerHandle );
     

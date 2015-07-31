@@ -25,7 +25,7 @@
 /**********************************************************************************************/
 
 /**
- *  @struct STGPIOConfig
+ *  @struct STGpioConfig
  *  @brief  struct to represent the GPIO configurations
  */
 struct STGpioConfig
@@ -35,6 +35,9 @@ struct STGpioConfig
     uint32_t    dwPin;          /**< the Pin value      */
 };
 
+/**
+ * @brief controls the status of the buttons
+ */
 struct STGpioInputStatus
 {
     uint8_t     bState;
@@ -109,6 +112,7 @@ uint32_t BrdKeyInit( void )
 #if     DK_TM4C123G
 
 #elif   EK_TM4C1294XL
+            //! enable the pull-up resistor of the PAD
             GPIOPadConfigSet( stSwitchConfig[bCounter].dwBASE, stSwitchConfig[bCounter].dwPin , GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU );
 #endif
             
@@ -159,10 +163,9 @@ uint32_t BrdKeyRead( UsrSwType sw )
 
 uint32_t UserSwitchTask( void* lpParam )
 {
-    static  UsrSwType lblButton = USR_SW1;
+    static  UsrSwType lblButton = USR_SW1;  //! local variable to control the current key to be read
     struct STGpioInputStatus* pSwitchStatus = &stSwitchStatus[lblButton];
     const struct STGpioConfig* pSwitchConfig = &stSwitchConfig[lblButton];
-    uint8_t bState;
     
     bBusy = 1;
 
@@ -177,9 +180,11 @@ uint32_t UserSwitchTask( void* lpParam )
             break;
     }
 
+    // save the previous state
     pSwitchStatus->bPrevState = pSwitchStatus->bState;
-    bState = (GPIOPinRead( pSwitchConfig->dwBASE, pSwitchConfig->dwPin ) ? 0 : 1);
-    pSwitchStatus->bState = bState;
+    
+    // get the new switch status
+    pSwitchStatus->bState = (GPIOPinRead( pSwitchConfig->dwBASE, pSwitchConfig->dwPin ) ? 0 : 1);
 
     bBusy = 0;
 
